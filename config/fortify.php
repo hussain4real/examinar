@@ -144,9 +144,13 @@ return [
     */
 
     'features' => [
-        // Features::registration(), // Disabled — admin creates students via Filament
-        // Features::resetPasswords(),
-        // Features::emailVerification(),
+        Features::registration(),
+        Features::resetPasswords(),
+        Features::emailVerification(),
+        Features::twoFactorAuthentication([
+            'confirm' => true,
+            'confirmPassword' => true,
+        ]),
     ],
 
 ];
