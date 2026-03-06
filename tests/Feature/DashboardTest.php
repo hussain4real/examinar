@@ -15,10 +15,15 @@ test('authenticated admin is redirected to admin panel', function () {
     $response->assertRedirect('/admin');
 });
 
-test('authenticated student is redirected to lobby', function () {
+test('authenticated student can visit the dashboard', function () {
     $user = User::factory()->create(['role' => 'student']);
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));
-    $response->assertRedirect(route('student.lobby'));
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Dashboard')
+        ->has('stats')
+        ->has('recentAttempts')
+    );
 });

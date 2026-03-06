@@ -4,7 +4,14 @@ import { useEchoPublic } from '@laravel/echo-vue';
 import { Clock, Play, Trophy, Users } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import StudentLayout from '@/layouts/StudentLayout.vue';
 
 type ExamSession = {
@@ -37,7 +44,7 @@ type PastAttempt = {
     };
 };
 
-const props = defineProps<{
+defineProps<{
     sessions: ExamSession[];
     pastAttempts: PastAttempt[];
 }>();
@@ -60,7 +67,8 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
             <div class="mb-8">
                 <h1 class="text-2xl font-bold tracking-tight">Exam Lobby</h1>
                 <p class="mt-1 text-muted-foreground">
-                    Available exams will appear here. Wait for your instructor to start a session.
+                    Available exams will appear here. Wait for your instructor
+                    to start a session.
                 </p>
             </div>
 
@@ -73,9 +81,17 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                             <div class="flex items-start justify-between">
                                 <CardTitle>{{ session.exam.title }}</CardTitle>
                                 <Badge
-                                    :variant="session.status === 'active' ? 'default' : 'secondary'"
+                                    :variant="
+                                        session.status === 'active'
+                                            ? 'default'
+                                            : 'secondary'
+                                    "
                                 >
-                                    {{ session.status === 'active' ? 'In Progress' : 'Waiting' }}
+                                    {{
+                                        session.status === 'active'
+                                            ? 'In Progress'
+                                            : 'Waiting'
+                                    }}
                                 </Badge>
                             </div>
                             <CardDescription v-if="session.exam.description">
@@ -83,18 +99,33 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div class="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            <div
+                                class="flex flex-wrap gap-4 text-sm text-muted-foreground"
+                            >
                                 <div class="flex items-center gap-1.5">
                                     <Clock class="size-4" />
-                                    <span>{{ session.exam.duration_minutes }} min</span>
+                                    <span
+                                        >{{
+                                            session.exam.duration_minutes
+                                        }}
+                                        min</span
+                                    >
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     <Trophy class="size-4" />
-                                    <span>Pass: {{ session.exam.pass_score }}%</span>
+                                    <span
+                                        >Pass:
+                                        {{ session.exam.pass_score }}%</span
+                                    >
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     <Users class="size-4" />
-                                    <span>{{ session.student_count }} students</span>
+                                    <span
+                                        >{{
+                                            session.student_count
+                                        }}
+                                        students</span
+                                    >
                                 </div>
                             </div>
                         </CardContent>
@@ -109,7 +140,12 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                                     Start Exam
                                 </Button>
                             </Link>
-                            <Button v-else variant="secondary" class="w-full" disabled>
+                            <Button
+                                v-else
+                                variant="secondary"
+                                class="w-full"
+                                disabled
+                            >
                                 Waiting for Instructor...
                             </Button>
                         </CardFooter>
@@ -127,7 +163,8 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                 </div>
                 <h3 class="text-lg font-medium">No Active Sessions</h3>
                 <p class="mt-1 max-w-sm text-sm text-muted-foreground">
-                    There are no exam sessions available right now. Your instructor will start one soon.
+                    There are no exam sessions available right now. Your
+                    instructor will start one soon.
                 </p>
             </div>
 
@@ -142,9 +179,15 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                         class="flex items-center justify-between rounded-lg border p-4 transition hover:bg-accent"
                     >
                         <div>
-                            <p class="font-medium">{{ attempt.session.exam.title }}</p>
+                            <p class="font-medium">
+                                {{ attempt.session.exam.title }}
+                            </p>
                             <p class="text-sm text-muted-foreground">
-                                {{ new Date(attempt.submitted_at!).toLocaleDateString() }}
+                                {{
+                                    new Date(
+                                        attempt.submitted_at!,
+                                    ).toLocaleDateString()
+                                }}
                             </p>
                         </div>
                         <div class="text-right">
@@ -153,13 +196,21 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                             </p>
                             <Badge
                                 :variant="
-                                    Math.round((attempt.score / attempt.total_points) * 100) >= attempt.session.exam.pass_score
+                                    Math.round(
+                                        (attempt.score / attempt.total_points) *
+                                            100,
+                                    ) >= attempt.session.exam.pass_score
                                         ? 'default'
                                         : 'destructive'
                                 "
                                 class="mt-1"
                             >
-                                {{ Math.round((attempt.score / attempt.total_points) * 100) }}%
+                                {{
+                                    Math.round(
+                                        (attempt.score / attempt.total_points) *
+                                            100,
+                                    )
+                                }}%
                             </Badge>
                         </div>
                     </Link>

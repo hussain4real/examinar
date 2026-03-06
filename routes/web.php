@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExamController;
 use App\Http\Controllers\Student\LobbyController;
 use App\Http\Controllers\Student\ResultController;
@@ -13,11 +14,11 @@ Route::inertia('/', 'Welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        if (request()->user()->isStudent()) {
-            return redirect()->route('student.lobby');
+        if (request()->user()->isAdmin()) {
+            return redirect('/admin');
         }
 
-        return redirect('/admin');
+        return app(DashboardController::class)(request());
     })->name('dashboard');
 });
 

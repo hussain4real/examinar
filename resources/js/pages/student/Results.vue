@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, CheckCircle, Clock, Flag, Trophy, XCircle } from 'lucide-vue-next';
+import {
+    ArrowLeft,
+    CheckCircle,
+    Clock,
+    Flag,
+    Trophy,
+    XCircle,
+} from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +26,7 @@ type AnswerReview = {
     };
 };
 
-const props = defineProps<{
+defineProps<{
     attempt: {
         id: number;
         score: number;
@@ -51,7 +58,10 @@ function formatDuration(start: string, end: string): string {
     <StudentLayout>
         <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
             <!-- Back link -->
-            <Link href="/student/lobby" class="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+            <Link
+                href="/student/lobby"
+                class="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
                 <ArrowLeft class="size-4" />
                 Back to Lobby
             </Link>
@@ -63,17 +73,41 @@ function formatDuration(start: string, end: string): string {
                 </CardHeader>
                 <CardContent>
                     <!-- Score Display -->
-                    <div class="mb-6 flex flex-col items-center gap-4 rounded-xl bg-muted/50 py-8">
-                        <div class="flex size-20 items-center justify-center rounded-full" :class="attempt.passed ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'">
-                            <Trophy class="size-10" :class="attempt.passed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'" />
+                    <div
+                        class="mb-6 flex flex-col items-center gap-4 rounded-xl bg-muted/50 py-8"
+                    >
+                        <div
+                            class="flex size-20 items-center justify-center rounded-full"
+                            :class="
+                                attempt.passed
+                                    ? 'bg-green-100 dark:bg-green-900/30'
+                                    : 'bg-red-100 dark:bg-red-900/30'
+                            "
+                        >
+                            <Trophy
+                                class="size-10"
+                                :class="
+                                    attempt.passed
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                "
+                            />
                         </div>
                         <div class="text-center">
-                            <p class="text-4xl font-bold">{{ attempt.percentage?.toFixed(1) }}%</p>
+                            <p class="text-4xl font-bold">
+                                {{ attempt.percentage?.toFixed(1) }}%
+                            </p>
                             <p class="mt-1 text-lg text-muted-foreground">
-                                {{ attempt.score }} / {{ attempt.total_points }} points
+                                {{ attempt.score }} /
+                                {{ attempt.total_points }} points
                             </p>
                         </div>
-                        <Badge :variant="attempt.passed ? 'default' : 'destructive'" class="text-sm px-4 py-1">
+                        <Badge
+                            :variant="
+                                attempt.passed ? 'default' : 'destructive'
+                            "
+                            class="px-4 py-1 text-sm"
+                        >
                             {{ attempt.passed ? 'PASSED' : 'FAILED' }}
                         </Badge>
                     </div>
@@ -81,24 +115,39 @@ function formatDuration(start: string, end: string): string {
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-4 text-center text-sm">
                         <div class="rounded-lg border p-3">
-                            <Trophy class="mx-auto mb-1 size-5 text-muted-foreground" />
+                            <Trophy
+                                class="mx-auto mb-1 size-5 text-muted-foreground"
+                            />
                             <p class="font-medium">Pass Score</p>
-                            <p class="text-muted-foreground">{{ exam.pass_score }}%</p>
+                            <p class="text-muted-foreground">
+                                {{ exam.pass_score }}%
+                            </p>
                         </div>
                         <div class="rounded-lg border p-3">
-                            <Clock class="mx-auto mb-1 size-5 text-muted-foreground" />
+                            <Clock
+                                class="mx-auto mb-1 size-5 text-muted-foreground"
+                            />
                             <p class="font-medium">Duration</p>
                             <p class="text-muted-foreground">
                                 <template v-if="attempt.submitted_at">
-                                    {{ formatDuration(attempt.started_at, attempt.submitted_at) }}
+                                    {{
+                                        formatDuration(
+                                            attempt.started_at,
+                                            attempt.submitted_at,
+                                        )
+                                    }}
                                 </template>
                                 <template v-else>—</template>
                             </p>
                         </div>
                         <div class="rounded-lg border p-3">
-                            <Flag class="mx-auto mb-1 size-5 text-muted-foreground" />
+                            <Flag
+                                class="mx-auto mb-1 size-5 text-muted-foreground"
+                            />
                             <p class="font-medium">Flags</p>
-                            <p class="text-muted-foreground">{{ attempt.flag_count }}</p>
+                            <p class="text-muted-foreground">
+                                {{ attempt.flag_count }}
+                            </p>
                         </div>
                     </div>
                 </CardContent>
@@ -107,40 +156,80 @@ function formatDuration(start: string, end: string): string {
             <!-- Answer Review -->
             <h2 class="mb-4 text-lg font-semibold">Question Review</h2>
             <div class="space-y-4">
-                <Card v-for="(answer, index) in answers" :key="answer.question_id">
+                <Card
+                    v-for="(answer, index) in answers"
+                    :key="answer.question_id"
+                >
                     <CardHeader>
                         <div class="flex items-start gap-3">
                             <div class="mt-0.5">
-                                <CheckCircle v-if="answer.is_correct" class="size-5 text-green-600 dark:text-green-400" />
-                                <XCircle v-else class="size-5 text-red-600 dark:text-red-400" />
+                                <CheckCircle
+                                    v-if="answer.is_correct"
+                                    class="size-5 text-green-600 dark:text-green-400"
+                                />
+                                <XCircle
+                                    v-else
+                                    class="size-5 text-red-600 dark:text-red-400"
+                                />
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center justify-between">
-                                    <CardTitle class="text-sm">Question {{ index + 1 }}</CardTitle>
+                                    <CardTitle class="text-sm"
+                                        >Question {{ index + 1 }}</CardTitle
+                                    >
                                     <Badge variant="outline" class="text-xs">
-                                        {{ answer.is_correct ? answer.question.points : 0 }}/{{ answer.question.points }} pts
+                                        {{
+                                            answer.is_correct
+                                                ? answer.question.points
+                                                : 0
+                                        }}/{{ answer.question.points }} pts
                                     </Badge>
                                 </div>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div class="mb-4 text-sm" v-html="answer.question.body" />
+                        <div
+                            class="mb-4 text-sm"
+                            v-html="answer.question.body"
+                        />
 
                         <!-- Options review -->
-                        <div v-if="answer.question.type === 'mcq' && answer.question.options" class="space-y-2">
+                        <div
+                            v-if="
+                                answer.question.type === 'mcq' &&
+                                answer.question.options
+                            "
+                            class="space-y-2"
+                        >
                             <div
                                 v-for="option in answer.question.options"
                                 :key="option"
                                 class="flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
                                 :class="{
-                                    'border-green-500 bg-green-50 dark:bg-green-900/20': option === answer.question.correct_answer,
-                                    'border-red-500 bg-red-50 dark:bg-red-900/20': option === answer.selected_answer && option !== answer.question.correct_answer,
+                                    'border-green-500 bg-green-50 dark:bg-green-900/20':
+                                        option ===
+                                        answer.question.correct_answer,
+                                    'border-red-500 bg-red-50 dark:bg-red-900/20':
+                                        option === answer.selected_answer &&
+                                        option !==
+                                            answer.question.correct_answer,
                                 }"
                             >
                                 <span class="flex-1">{{ option }}</span>
-                                <CheckCircle v-if="option === answer.question.correct_answer" class="size-4 text-green-600" />
-                                <XCircle v-else-if="option === answer.selected_answer" class="size-4 text-red-600" />
+                                <CheckCircle
+                                    v-if="
+                                        option ===
+                                        answer.question.correct_answer
+                                    "
+                                    class="size-4 text-green-600"
+                                />
+                                <XCircle
+                                    v-else-if="
+                                        option === answer.selected_answer
+                                    "
+                                    class="size-4 text-red-600"
+                                />
                             </div>
                         </div>
 
@@ -151,8 +240,14 @@ function formatDuration(start: string, end: string): string {
                                 :key="opt"
                                 class="rounded-md border px-3 py-2 text-center text-sm"
                                 :class="{
-                                    'border-green-500 bg-green-50 dark:bg-green-900/20': opt.toLowerCase() === answer.question.correct_answer.toLowerCase(),
-                                    'border-red-500 bg-red-50 dark:bg-red-900/20': opt.toLowerCase() === answer.selected_answer?.toLowerCase() && opt.toLowerCase() !== answer.question.correct_answer.toLowerCase(),
+                                    'border-green-500 bg-green-50 dark:bg-green-900/20':
+                                        opt.toLowerCase() ===
+                                        answer.question.correct_answer.toLowerCase(),
+                                    'border-red-500 bg-red-50 dark:bg-red-900/20':
+                                        opt.toLowerCase() ===
+                                            answer.selected_answer?.toLowerCase() &&
+                                        opt.toLowerCase() !==
+                                            answer.question.correct_answer.toLowerCase(),
                                 }"
                             >
                                 {{ opt }}

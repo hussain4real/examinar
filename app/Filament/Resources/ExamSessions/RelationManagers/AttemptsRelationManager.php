@@ -2,8 +2,12 @@
 
 namespace App\Filament\Resources\ExamSessions\RelationManagers;
 
+use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -49,6 +53,9 @@ class AttemptsRelationManager extends RelationManager
                 TextColumn::make('submitted_at')
                     ->dateTime()
                     ->sortable(),
+            ])
+            ->recordActions([
+                ViewAction::make(),
             ]);
     }
 
@@ -56,31 +63,64 @@ class AttemptsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextEntry::make('user.name')
-                    ->label('Student'),
-                TextEntry::make('status')
-                    ->badge(),
-                TextEntry::make('score')
-                    ->formatStateUsing(fn ($record): string => "{$record->score}/{$record->total_points}"),
-                TextEntry::make('flag_count')
-                    ->label('Anti-Cheat Flags')
-                    ->badge()
-                    ->color(fn (int $state): string => match (true) {
-                        $state === 0 => 'gray',
-                        $state <= 3 => 'warning',
-                        default => 'danger',
-                    }),
-                TextEntry::make('started_at')
-                    ->dateTime(),
-                TextEntry::make('submitted_at')
-                    ->dateTime(),
-                TextEntry::make('antiCheatLogs')
-                    ->label('Anti-Cheat Events')
-                    ->listWithLineBreaks()
-                    ->formatStateUsing(fn ($state): string => is_array($state)
-                        ? "[{$state['created_at']}] {$state['event_type']}"
-                        : (string) $state
-                    ),
+                Section::make('Attempt Details')
+                    ->schema([
+                        TextEntry::make('user.name')
+                            ->label('Student'),
+                        TextEntry::make('status')
+                            ->badge(),
+                        TextEntry::make('score')
+                            ->formatStateUsing(fn ($record): string => "{$record->score}/{$record->total_points}"),
+                        TextEntry::make('flag_count')
+                            ->label('Anti-Cheat Flags')
+                            ->badge()
+                            ->color(fn (int $state): string => match (true) {
+                                $state === 0 => 'gray',
+                                $state <= 3 => 'warning',
+                                default => 'danger',
+                            }),
+                        TextEntry::make('started_at')
+                            ->dateTime(),
+                        TextEntry::make('submitted_at')
+                            ->dateTime(),
+                    ])
+                    ->columns(3),
+
+                Section::make('Anti-Cheat Logs')
+                    ->schema([
+                        RepeatableEntry::make('antiCheatLogs')
+                            ->hiddenLabel()
+                            ->table([
+                                TableColumn::make('Event'),
+                                TableColumn::make('Details'),
+                                TableColumn::make('Time'),
+                            ])
+                            ->schema([
+                                TextEntry::make('event_type')
+                                    ->badge()
+                                    ->color(fn (string $state): string => match ($state) {
+                                        'tab_switch' => 'warning',
+                                        'fullscreen_exit' => 'danger',
+                                        'copy_attempt' => 'danger',
+                                        'right_click' => 'warning',
+                                        default => 'gray',
+                                    }),
+                                TextEntry::make('details')
+                                    ->formatStateUsing(function ($state): string {
+                                        if (is_array($state)) {
+                                            return collect($state)
+                                                ->map(fn ($v, $k) => "{$k}: {$v}")
+                                                ->implode(', ');
+                                        }
+
+                                        return $state ? (string) $state : '—';
+                                    }),
+                                TextEntry::make('created_at')
+                                    ->dateTime(),
+                            ]),
+                    ])
+                    ->collapsible()
+                    ->visible(fn ($record): bool => $record->antiCheatLogs()->exists()),
             ]);
     }
 }

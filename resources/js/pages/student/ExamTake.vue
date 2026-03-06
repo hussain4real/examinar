@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { useEchoPublic } from '@laravel/echo-vue';
-import { AlertTriangle, ChevronLeft, ChevronRight, Clock, Flag, Send } from 'lucide-vue-next';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+    AlertTriangle,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Flag,
+    Send,
+} from 'lucide-vue-next';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,9 +128,13 @@ function cancelSubmit(): void {
 
 function submitExam(): void {
     submitting.value = true;
-    router.post(`/student/exam/${props.examSession.id}/submit`, {}, {
-        preserveScroll: true,
-    });
+    router.post(
+        `/student/exam/${props.examSession.id}/submit`,
+        {},
+        {
+            preserveScroll: true,
+        },
+    );
 }
 
 function autoSubmit(): void {
@@ -134,14 +145,21 @@ function autoSubmit(): void {
 }
 
 // Listen for session end
-useEchoPublic(`exam-session.${props.examSession.id}`, '.ExamSessionEnded', () => {
-    autoSubmit();
-});
+useEchoPublic(
+    `exam-session.${props.examSession.id}`,
+    '.ExamSessionEnded',
+    () => {
+        autoSubmit();
+    },
+);
 
 // Anti-cheat
 const flagCount = ref(0);
 
-function logAntiCheatEvent(eventType: string, details?: Record<string, unknown>): void {
+function logAntiCheatEvent(
+    eventType: string,
+    details?: Record<string, unknown>,
+): void {
     fetch(`/student/exam/${props.examSession.id}/anti-cheat`, {
         method: 'POST',
         headers: {
@@ -150,11 +168,13 @@ function logAntiCheatEvent(eventType: string, details?: Record<string, unknown>)
             Accept: 'application/json',
         },
         body: JSON.stringify({ event_type: eventType, details }),
-    }).then((res) => res.json()).then((data) => {
-        if (data.flag_count !== undefined) {
-            flagCount.value = data.flag_count;
-        }
-    });
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.flag_count !== undefined) {
+                flagCount.value = data.flag_count;
+            }
+        });
 }
 
 function handleVisibilityChange(): void {
@@ -209,15 +229,24 @@ onBeforeUnmount(() => {
 
     <div class="flex min-h-screen flex-col bg-background select-none">
         <!-- Top Bar -->
-        <header class="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-            <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+        <header
+            class="sticky top-0 z-50 border-b bg-background/95 backdrop-blur"
+        >
+            <div
+                class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6"
+            >
                 <div class="flex items-center gap-3">
-                    <h1 class="text-base font-semibold sm:text-lg">{{ exam.title }}</h1>
+                    <h1 class="text-base font-semibold sm:text-lg">
+                        {{ exam.title }}
+                    </h1>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <!-- Flag indicator -->
-                    <div v-if="flagCount > 0" class="flex items-center gap-1 text-destructive">
+                    <div
+                        v-if="flagCount > 0"
+                        class="flex items-center gap-1 text-destructive"
+                    >
                         <Flag class="size-4" />
                         <span class="text-xs font-medium">{{ flagCount }}</span>
                     </div>
@@ -231,7 +260,8 @@ onBeforeUnmount(() => {
                     <div
                         class="flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono text-sm font-semibold"
                         :class="{
-                            'bg-destructive/10 text-destructive animate-pulse': isTimeLow,
+                            'animate-pulse bg-destructive/10 text-destructive':
+                                isTimeLow,
                             'bg-muted': !isTimeLow,
                         }"
                     >
@@ -243,11 +273,17 @@ onBeforeUnmount(() => {
         </header>
 
         <!-- Main Content -->
-        <div class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:flex-row sm:px-6">
+        <div
+            class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:flex-row sm:px-6"
+        >
             <!-- Question Navigation Sidebar -->
             <aside class="order-2 sm:order-1 sm:w-48 sm:shrink-0">
                 <div class="sticky top-20">
-                    <p class="mb-2 text-xs font-medium uppercase text-muted-foreground">Questions</p>
+                    <p
+                        class="mb-2 text-xs font-medium text-muted-foreground uppercase"
+                    >
+                        Questions
+                    </p>
                     <div class="grid grid-cols-5 gap-1.5 sm:grid-cols-4">
                         <button
                             v-for="(q, i) in questions"
@@ -255,9 +291,12 @@ onBeforeUnmount(() => {
                             @click="goToQuestion(i)"
                             class="flex size-9 items-center justify-center rounded-md text-sm font-medium transition"
                             :class="{
-                                'bg-primary text-primary-foreground': i === currentIndex,
-                                'bg-primary/20 text-primary hover:bg-primary/30': i !== currentIndex && answers[q.id],
-                                'bg-muted hover:bg-accent': i !== currentIndex && !answers[q.id],
+                                'bg-primary text-primary-foreground':
+                                    i === currentIndex,
+                                'bg-primary/20 text-primary hover:bg-primary/30':
+                                    i !== currentIndex && answers[q.id],
+                                'bg-muted hover:bg-accent':
+                                    i !== currentIndex && !answers[q.id],
                             }"
                         >
                             {{ i + 1 }}
@@ -285,32 +324,56 @@ onBeforeUnmount(() => {
                     <CardHeader>
                         <div class="flex items-center justify-between">
                             <CardTitle class="text-base">
-                                Question {{ currentIndex + 1 }} of {{ totalQuestions }}
+                                Question {{ currentIndex + 1 }} of
+                                {{ totalQuestions }}
                             </CardTitle>
-                            <Badge variant="outline">{{ currentQuestion.points }} pt{{ currentQuestion.points !== 1 ? 's' : '' }}</Badge>
+                            <Badge variant="outline"
+                                >{{ currentQuestion.points }} pt{{
+                                    currentQuestion.points !== 1 ? 's' : ''
+                                }}</Badge
+                            >
                         </div>
                     </CardHeader>
                     <CardContent>
                         <!-- Question Body -->
-                        <div class="mb-6 text-base leading-relaxed" v-html="currentQuestion.body" />
+                        <div
+                            class="mb-6 text-base leading-relaxed"
+                            v-html="currentQuestion.body"
+                        />
 
                         <!-- MCQ Options -->
-                        <div v-if="currentQuestion.type === 'mcq' && currentQuestion.options" class="space-y-3">
+                        <div
+                            v-if="
+                                currentQuestion.type === 'mcq' &&
+                                currentQuestion.options
+                            "
+                            class="space-y-3"
+                        >
                             <button
-                                v-for="(option, optIndex) in currentQuestion.options"
+                                v-for="(
+                                    option, optIndex
+                                ) in currentQuestion.options"
                                 :key="optIndex"
-                                @click="selectAnswer(currentQuestion.id, option)"
+                                @click="
+                                    selectAnswer(currentQuestion.id, option)
+                                "
                                 class="flex w-full items-start gap-3 rounded-lg border p-4 text-left transition"
                                 :class="{
-                                    'border-primary bg-primary/5 ring-2 ring-primary': answers[currentQuestion.id] === option,
-                                    'hover:bg-accent': answers[currentQuestion.id] !== option,
+                                    'border-primary bg-primary/5 ring-2 ring-primary':
+                                        answers[currentQuestion.id] === option,
+                                    'hover:bg-accent':
+                                        answers[currentQuestion.id] !== option,
                                 }"
                             >
                                 <span
                                     class="flex size-7 shrink-0 items-center justify-center rounded-full border text-sm font-medium"
                                     :class="{
-                                        'border-primary bg-primary text-primary-foreground': answers[currentQuestion.id] === option,
-                                        'border-muted-foreground/30': answers[currentQuestion.id] !== option,
+                                        'border-primary bg-primary text-primary-foreground':
+                                            answers[currentQuestion.id] ===
+                                            option,
+                                        'border-muted-foreground/30':
+                                            answers[currentQuestion.id] !==
+                                            option,
                                     }"
                                 >
                                     {{ String.fromCharCode(65 + optIndex) }}
@@ -320,15 +383,20 @@ onBeforeUnmount(() => {
                         </div>
 
                         <!-- True/False Options -->
-                        <div v-else-if="currentQuestion.type === 'true_false'" class="grid grid-cols-2 gap-3">
+                        <div
+                            v-else-if="currentQuestion.type === 'true_false'"
+                            class="grid grid-cols-2 gap-3"
+                        >
                             <button
                                 v-for="opt in ['True', 'False']"
                                 :key="opt"
                                 @click="selectAnswer(currentQuestion.id, opt)"
                                 class="rounded-lg border p-4 text-center font-medium transition"
                                 :class="{
-                                    'border-primary bg-primary/5 ring-2 ring-primary': answers[currentQuestion.id] === opt,
-                                    'hover:bg-accent': answers[currentQuestion.id] !== opt,
+                                    'border-primary bg-primary/5 ring-2 ring-primary':
+                                        answers[currentQuestion.id] === opt,
+                                    'hover:bg-accent':
+                                        answers[currentQuestion.id] !== opt,
                                 }"
                             >
                                 {{ opt }}
@@ -389,10 +457,16 @@ onBeforeUnmount(() => {
                 v-if="showConfirmSubmit"
                 class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
             >
-                <div class="mx-4 w-full max-w-md rounded-xl bg-background p-6 shadow-lg">
+                <div
+                    class="mx-4 w-full max-w-md rounded-xl bg-background p-6 shadow-lg"
+                >
                     <div class="mb-4 flex items-center gap-3">
-                        <div class="flex size-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                            <AlertTriangle class="size-5 text-amber-600 dark:text-amber-400" />
+                        <div
+                            class="flex size-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
+                        >
+                            <AlertTriangle
+                                class="size-5 text-amber-600 dark:text-amber-400"
+                            />
                         </div>
                         <h2 class="text-lg font-semibold">Submit Exam?</h2>
                     </div>
@@ -402,19 +476,33 @@ onBeforeUnmount(() => {
                         <strong>{{ totalQuestions }}</strong> questions.
                     </p>
 
-                    <p v-if="answeredCount < totalQuestions" class="mb-6 text-sm text-destructive">
-                        {{ totalQuestions - answeredCount }} question(s) are still unanswered.
+                    <p
+                        v-if="answeredCount < totalQuestions"
+                        class="mb-6 text-sm text-destructive"
+                    >
+                        {{ totalQuestions - answeredCount }} question(s) are
+                        still unanswered.
                     </p>
                     <p v-else class="mb-6 text-sm text-muted-foreground">
                         All questions answered. Ready to submit?
                     </p>
 
                     <div class="flex gap-3">
-                        <Button variant="outline" class="flex-1" @click="cancelSubmit">
+                        <Button
+                            variant="outline"
+                            class="flex-1"
+                            @click="cancelSubmit"
+                        >
                             Go Back
                         </Button>
-                        <Button class="flex-1" :disabled="submitting" @click="submitExam">
-                            {{ submitting ? 'Submitting...' : 'Confirm Submit' }}
+                        <Button
+                            class="flex-1"
+                            :disabled="submitting"
+                            @click="submitExam"
+                        >
+                            {{
+                                submitting ? 'Submitting...' : 'Confirm Submit'
+                            }}
                         </Button>
                     </div>
                 </div>
