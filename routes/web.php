@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return redirect()->route('student.lobby');
         }
 
-        return Inertia\Inertia::render('Dashboard');
+        return redirect('/admin');
     })->name('dashboard');
 });
 

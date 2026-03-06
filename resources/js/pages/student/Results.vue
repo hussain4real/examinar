@@ -151,8 +151,8 @@ function formatDuration(start: string, end: string): string {
                                 :key="opt"
                                 class="rounded-md border px-3 py-2 text-center text-sm"
                                 :class="{
-                                    'border-green-500 bg-green-50 dark:bg-green-900/20': opt === answer.question.correct_answer,
-                                    'border-red-500 bg-red-50 dark:bg-red-900/20': opt === answer.selected_answer && opt !== answer.question.correct_answer,
+                                    'border-green-500 bg-green-50 dark:bg-green-900/20': opt.toLowerCase() === answer.question.correct_answer.toLowerCase(),
+                                    'border-red-500 bg-red-50 dark:bg-red-900/20': opt.toLowerCase() === answer.selected_answer?.toLowerCase() && opt.toLowerCase() !== answer.question.correct_answer.toLowerCase(),
                                 }"
                             >
                                 {{ opt }}

@@ -37,6 +37,23 @@ class ExamSessionInfolist
                         TextEntry::make('attempts_count')
                             ->state(fn ($record): int => $record->attempts()->count())
                             ->label('Total Students'),
+                        TextEntry::make('flagged_attempts')
+                            ->label('Flagged Students')
+                            ->state(fn ($record): int => $record->attempts()->where('flag_count', '>', 0)->count())
+                            ->badge()
+                            ->color(fn (int $state): string => $state > 0 ? 'danger' : 'gray'),
+                        TextEntry::make('average_score')
+                            ->label('Average Score')
+                            ->state(function ($record): string {
+                                $attempts = $record->attempts()->whereNotNull('score');
+                                if ($attempts->count() === 0) {
+                                    return '—';
+                                }
+                                $avg = $attempts->avg('score');
+                                $total = $record->attempts()->first()?->total_points ?? 0;
+
+                                return round($avg, 1).'/'.$total;
+                            }),
                         TextEntry::make('created_at')
                             ->dateTime(),
                     ])
