@@ -128,7 +128,7 @@ const features = [
                 >
                     Assessments made
                     <span
-                        class="bg-gradient-to-r from-primary via-primary/70 to-primary bg-clip-text text-transparent"
+                        class="bg-linear-to-r from-primary via-primary/70 to-primary bg-clip-text text-transparent"
                         >simple & secure</span
                     >
                 </h1>
