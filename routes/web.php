@@ -12,7 +12,13 @@ Route::inertia('/', 'Welcome', [
 ])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', function () {
+        if (request()->user()->isStudent()) {
+            return redirect()->route('student.lobby');
+        }
+
+        return Inertia\Inertia::render('Dashboard');
+    })->name('dashboard');
 });
 
 // Student routes

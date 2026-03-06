@@ -61,7 +61,7 @@ class ExamController extends Controller
             'id' => $q->id,
             'type' => $q->type,
             'body' => $q->body,
-            'options' => $q->options,
+            'options' => $q->options ? array_map(fn ($o) => is_array($o) ? $o['text'] : $o, $q->options) : null,
             'points' => $q->points,
             'order' => $q->order,
         ]);

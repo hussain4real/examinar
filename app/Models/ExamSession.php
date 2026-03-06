@@ -18,6 +18,21 @@ class ExamSession extends Model
         'status',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (ExamSession $session) {
+            if ($session->isDirty('status')) {
+                if ($session->status === 'active' && ! $session->started_at) {
+                    $session->started_at = now();
+                }
+
+                if ($session->status === 'completed' && ! $session->ended_at) {
+                    $session->ended_at = now();
+                }
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [

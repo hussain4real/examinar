@@ -21,7 +21,7 @@ class QuestionFactory extends Factory
             'exam_id' => Exam::factory(),
             'type' => 'mcq',
             'body' => fake()->sentence().'?',
-            'options' => ['Option A', 'Option B', 'Option C', 'Option D'],
+            'options' => [['text' => 'Option A'], ['text' => 'Option B'], ['text' => 'Option C'], ['text' => 'Option D']],
             'correct_answer' => 'Option A',
             'points' => 1,
             'order' => 1,

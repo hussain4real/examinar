@@ -42,7 +42,7 @@ class ResultController extends Controller
                 'question' => [
                     'body' => $a->question->body,
                     'type' => $a->question->type,
-                    'options' => $a->question->options,
+                    'options' => $a->question->options ? array_map(fn ($o) => is_array($o) ? $o['text'] : $o, $a->question->options) : null,
                     'correct_answer' => $a->question->correct_answer,
                     'points' => $a->question->points,
                 ],
