@@ -177,25 +177,34 @@ function logAntiCheatEvent(
         });
 }
 
+function getEventContext(): Record<string, unknown> {
+    return {
+        question_number: currentIndex.value + 1,
+        question_id: currentQuestion.value?.id,
+        time_remaining: timeRemaining.value,
+        answered: answeredCount.value,
+    };
+}
+
 function handleVisibilityChange(): void {
     if (document.hidden) {
-        logAntiCheatEvent('tab_switch');
+        logAntiCheatEvent('tab_switch', getEventContext());
     }
 }
 
 function handleContextMenu(e: MouseEvent): void {
     e.preventDefault();
-    logAntiCheatEvent('right_click');
+    logAntiCheatEvent('right_click', getEventContext());
 }
 
 function handleCopy(e: ClipboardEvent): void {
     e.preventDefault();
-    logAntiCheatEvent('copy_attempt');
+    logAntiCheatEvent('copy_attempt', getEventContext());
 }
 
 function handleFullscreenChange(): void {
     if (!document.fullscreenElement) {
-        logAntiCheatEvent('fullscreen_exit');
+        logAntiCheatEvent('fullscreen_exit', getEventContext());
     }
 }
 

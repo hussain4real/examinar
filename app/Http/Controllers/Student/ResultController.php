@@ -18,6 +18,7 @@ class ResultController extends Controller
         $examAttempt->load([
             'session.exam:id,title,pass_score,duration_minutes',
             'answers.question:id,type,body,options,correct_answer,points',
+            'antiCheatLogs',
         ]);
 
         return Inertia::render('student/Results', [
@@ -35,6 +36,11 @@ class ResultController extends Controller
                 'title' => $examAttempt->session->exam->title,
                 'pass_score' => $examAttempt->session->exam->pass_score,
             ],
+            'antiCheatLogs' => $examAttempt->antiCheatLogs->map(fn ($log) => [
+                'event_type' => $log->event_type,
+                'details' => $log->details,
+                'created_at' => $log->created_at->toISOString(),
+            ]),
             'answers' => $examAttempt->answers->map(fn ($a) => [
                 'question_id' => $a->question_id,
                 'selected_answer' => $a->selected_answer,

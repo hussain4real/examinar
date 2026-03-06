@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import {
+    AlertTriangle,
     ArrowLeft,
     CheckCircle,
     Clock,
+    Copy,
+    Eye,
     Flag,
+    Maximize,
+    MousePointer,
     Trophy,
     XCircle,
 } from 'lucide-vue-next';
@@ -26,6 +31,12 @@ type AnswerReview = {
     };
 };
 
+type AntiCheatLog = {
+    event_type: string;
+    details: Record<string, unknown> | null;
+    created_at: string;
+};
+
 defineProps<{
     attempt: {
         id: number;
@@ -42,7 +53,30 @@ defineProps<{
         pass_score: number;
     };
     answers: AnswerReview[];
+    antiCheatLogs: AntiCheatLog[];
 }>();
+
+const eventLabels: Record<string, string> = {
+    tab_switch: 'Tab Switch',
+    fullscreen_exit: 'Fullscreen Exit',
+    copy_attempt: 'Copy Attempt',
+    right_click: 'Right Click',
+};
+
+const eventIcons: Record<string, typeof Eye> = {
+    tab_switch: Eye,
+    fullscreen_exit: Maximize,
+    copy_attempt: Copy,
+    right_click: MousePointer,
+};
+
+function formatTime(iso: string): string {
+    return new Date(iso).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+}
 
 function formatDuration(start: string, end: string): string {
     const diff = new Date(end).getTime() - new Date(start).getTime();
@@ -256,6 +290,81 @@ function formatDuration(start: string, end: string): string {
                     </CardContent>
                 </Card>
             </div>
+
+            <!-- Anti-Cheat Activity -->
+            <section v-if="antiCheatLogs.length > 0" class="mt-8">
+                <div class="mb-4 flex items-center gap-2">
+                    <AlertTriangle class="size-5 text-amber-500" />
+                    <h2 class="text-lg font-semibold">
+                        Flagged Activity ({{ antiCheatLogs.length }})
+                    </h2>
+                </div>
+                <Card>
+                    <CardContent class="p-0">
+                        <div class="divide-y">
+                            <div
+                                v-for="(log, i) in antiCheatLogs"
+                                :key="i"
+                                class="flex items-center gap-3 px-4 py-3"
+                            >
+                                <div
+                                    class="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
+                                >
+                                    <component
+                                        :is="
+                                            eventIcons[log.event_type] ||
+                                            AlertTriangle
+                                        "
+                                        class="size-4 text-amber-600 dark:text-amber-400"
+                                    />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium">
+                                        {{
+                                            eventLabels[log.event_type] ||
+                                            log.event_type
+                                        }}
+                                    </p>
+                                    <p
+                                        v-if="log.details"
+                                        class="text-xs text-muted-foreground"
+                                    >
+                                        <template
+                                            v-if="log.details.question_number"
+                                        >
+                                            Question
+                                            {{ log.details.question_number }}
+                                        </template>
+                                        <template
+                                            v-if="log.details.time_remaining"
+                                        >
+                                            &middot;
+                                            {{
+                                                Math.floor(
+                                                    Number(
+                                                        log.details
+                                                            .time_remaining,
+                                                    ) / 60,
+                                                )
+                                            }}m
+                                            {{
+                                                Number(
+                                                    log.details.time_remaining,
+                                                ) % 60
+                                            }}s remaining
+                                        </template>
+                                    </p>
+                                </div>
+                                <span
+                                    class="shrink-0 text-xs text-muted-foreground"
+                                >
+                                    {{ formatTime(log.created_at) }}
+                                </span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </section>
 
             <!-- Back to lobby -->
             <div class="mt-8 text-center">
