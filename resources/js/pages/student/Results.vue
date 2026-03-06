@@ -13,6 +13,7 @@ import {
     Trophy,
     XCircle,
 } from 'lucide-vue-next';
+import HelpBanner from '@/components/HelpBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,6 +100,22 @@ function formatDuration(start: string, end: string): string {
                 <ArrowLeft class="size-4" />
                 Back to Lobby
             </Link>
+
+            <HelpBanner
+                storage-key="results"
+                title="Reading Your Results"
+                class="mb-6"
+            >
+                Your score and pass/fail status are shown at the top. Below,
+                review each question &mdash;
+                <strong class="text-emerald-600 dark:text-emerald-400"
+                    >green</strong
+                >
+                = correct,
+                <strong class="text-destructive">red</strong>
+                = your incorrect answer. Any flagged activity is listed at the
+                bottom.
+            </HelpBanner>
 
             <!-- Summary Card -->
             <Card class="mb-8">

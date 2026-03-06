@@ -10,6 +10,7 @@ import {
     Radio,
     XCircle,
 } from 'lucide-vue-next';
+import HelpBanner from '@/components/HelpBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,6 +49,19 @@ defineProps<{
                     Welcome back! Here's an overview of your exam activity.
                 </p>
             </div>
+
+            <HelpBanner
+                storage-key="dashboard"
+                title="Welcome to Examinar!"
+                class="mb-6"
+            >
+                This is your dashboard showing exam stats and recent results.
+                Head to the
+                <strong>Exam Lobby</strong>
+                to join an active session, or check the
+                <strong>Help</strong>
+                page for a full guide.
+            </HelpBanner>
 
             <!-- Stats Cards -->
             <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

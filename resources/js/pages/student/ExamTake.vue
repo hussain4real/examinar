@@ -10,6 +10,7 @@ import {
     Send,
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import HelpBanner from '@/components/HelpBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -280,6 +281,14 @@ onBeforeUnmount(() => {
                 </div>
             </div>
         </header>
+
+        <div class="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+            <HelpBanner storage-key="exam-take" title="Exam Tips">
+                Your answers save automatically. Use the question grid to
+                navigate. Don&rsquo;t switch tabs or leave fullscreen &mdash;
+                it&rsquo;s monitored.
+            </HelpBanner>
+        </div>
 
         <!-- Main Content -->
         <div

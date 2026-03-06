@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useEchoPublic } from '@laravel/echo-vue';
 import { Clock, Play, Trophy, Users } from 'lucide-vue-next';
+import HelpBanner from '@/components/HelpBanner.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -71,6 +72,18 @@ useEchoPublic('lobby', '.ExamSessionEnded', () => {
                     to start a session.
                 </p>
             </div>
+
+            <HelpBanner
+                storage-key="lobby"
+                title="How the Lobby Works"
+                class="mb-6"
+            >
+                Available exams appear automatically when your instructor starts
+                a session. Click
+                <strong>Start Exam</strong>
+                on an active session to begin. Your recent results also show at
+                the bottom of this page.
+            </HelpBanner>
 
             <!-- Active Sessions -->
             <section v-if="sessions.length > 0" class="mb-10">

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExamController;
+use App\Http\Controllers\Student\GuideController;
 use App\Http\Controllers\Student\LobbyController;
 use App\Http\Controllers\Student\ResultController;
 use App\Http\Middleware\StudentOnly;
@@ -32,6 +33,8 @@ Route::middleware(['auth', StudentOnly::class])->prefix('student')->group(functi
     Route::post('exam/{examSession}/anti-cheat', [ExamController::class, 'logAntiCheat'])->name('student.exam.anti-cheat');
 
     Route::get('results/{examAttempt}', ResultController::class)->name('student.results');
+
+    Route::get('guide', GuideController::class)->name('student.guide');
 });
 
 require __DIR__.'/settings.php';

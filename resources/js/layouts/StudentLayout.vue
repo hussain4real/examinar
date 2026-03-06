@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { DoorOpen, LayoutDashboard, LogOut, User } from 'lucide-vue-next';
+import {
+    BookOpen,
+    DoorOpen,
+    LayoutDashboard,
+    LogOut,
+    User,
+} from 'lucide-vue-next';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 
 const page = usePage();
@@ -50,6 +56,18 @@ const currentPath = page.url;
                         >
                             <DoorOpen class="size-4" />
                             Exam Lobby
+                        </Link>
+                        <Link
+                            href="/student/guide"
+                            class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition"
+                            :class="
+                                currentPath.startsWith('/student/guide')
+                                    ? 'bg-accent font-medium text-accent-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                            "
+                        >
+                            <BookOpen class="size-4" />
+                            Help
                         </Link>
                     </nav>
                 </div>
