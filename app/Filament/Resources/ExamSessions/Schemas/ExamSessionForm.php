@@ -30,7 +30,8 @@ class ExamSessionForm
                             ->default('waiting')
                             ->required(),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->columnSpanFull(),
             ]);
     }
 }
