@@ -60,6 +60,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function examAttempts(): HasMany
     {
-        return $this->hasMany(ExamAttempt::class);
+        return $this->hasMany(ExamAttempt::class, 'user_id');
     }
 }
