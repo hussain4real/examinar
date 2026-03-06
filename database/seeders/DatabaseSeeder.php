@@ -40,53 +40,47 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Question::create([
-            'exam_id' => $exam->id,
             'type' => 'mcq',
             'body' => '<p>What is the capital of France?</p>',
             'options' => [['text' => 'London'], ['text' => 'Paris'], ['text' => 'Berlin'], ['text' => 'Madrid']],
             'correct_answer' => 'Paris',
-            'points' => 2,
-            'order' => 1,
         ]);
 
         Question::create([
-            'exam_id' => $exam->id,
             'type' => 'mcq',
             'body' => '<p>Which planet is known as the Red Planet?</p>',
             'options' => [['text' => 'Venus'], ['text' => 'Mars'], ['text' => 'Jupiter'], ['text' => 'Saturn']],
             'correct_answer' => 'Mars',
-            'points' => 2,
-            'order' => 2,
         ]);
 
         Question::create([
-            'exam_id' => $exam->id,
             'type' => 'true_false',
             'body' => '<p>The Earth revolves around the Sun.</p>',
             'options' => null,
             'correct_answer' => 'true',
-            'points' => 1,
-            'order' => 3,
         ]);
 
         Question::create([
-            'exam_id' => $exam->id,
             'type' => 'mcq',
             'body' => '<p>What is 12 × 12?</p>',
             'options' => [['text' => '124'], ['text' => '144'], ['text' => '132'], ['text' => '156']],
             'correct_answer' => '144',
-            'points' => 1,
-            'order' => 4,
         ]);
 
         Question::create([
-            'exam_id' => $exam->id,
             'type' => 'true_false',
             'body' => '<p>Water boils at 90°C at sea level.</p>',
             'options' => null,
             'correct_answer' => 'false',
-            'points' => 1,
-            'order' => 5,
+        ]);
+
+        $questions = Question::all();
+        $exam->questions()->attach([
+            $questions[0]->id => ['points' => 2, 'order' => 1],
+            $questions[1]->id => ['points' => 2, 'order' => 2],
+            $questions[2]->id => ['points' => 1, 'order' => 3],
+            $questions[3]->id => ['points' => 1, 'order' => 4],
+            $questions[4]->id => ['points' => 1, 'order' => 5],
         ]);
     }
 }

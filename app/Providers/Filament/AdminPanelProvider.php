@@ -44,6 +44,7 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
             ])
             ->sidebarCollapsibleOnDesktop()
+            ->databaseNotifications()
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

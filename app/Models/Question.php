@@ -4,33 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Question extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'exam_id',
         'type',
         'body',
         'options',
         'correct_answer',
-        'points',
-        'order',
     ];
 
     protected function casts(): array
     {
         return [
             'options' => 'array',
-            'points' => 'integer',
-            'order' => 'integer',
         ];
     }
 
-    public function exam(): BelongsTo
+    public function exams(): BelongsToMany
     {
-        return $this->belongsTo(Exam::class);
+        return $this->belongsToMany(Exam::class)
+            ->withPivot(['points', 'order'])
+            ->withTimestamps();
     }
 }

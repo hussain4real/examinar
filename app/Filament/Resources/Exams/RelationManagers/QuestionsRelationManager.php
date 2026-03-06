@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Exams\RelationManagers;
 
+use App\Models\Question;
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
@@ -21,6 +24,8 @@ use Filament\Tables\Table;
 class QuestionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'questions';
+
+    protected static ?string $recordTitleAttribute = 'body';
 
     public function form(Schema $schema): Schema
     {
@@ -41,16 +46,6 @@ class QuestionsRelationManager extends RelationManager
                             ->label('Question Text')
                             ->required()
                             ->columnSpanFull(),
-
-                        TextInput::make('points')
-                            ->numeric()
-                            ->required()
-                            ->default(1)
-                            ->minValue(1),
-
-                        TextInput::make('order')
-                            ->numeric()
-                            ->default(0),
                     ])
                     ->columns(2),
 
@@ -88,13 +83,27 @@ class QuestionsRelationManager extends RelationManager
                             ->required(),
                     ])
                     ->visible(fn (Get $get): bool => $get('type') === 'true_false'),
+
+                Section::make('Exam Settings')
+                    ->schema([
+                        TextInput::make('points')
+                            ->numeric()
+                            ->required()
+                            ->default(1)
+                            ->minValue(1),
+
+                        TextInput::make('order')
+                            ->numeric()
+                            ->default(0),
+                    ])
+                    ->columns(2),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->reorderable('order')
+            ->recordTitle(fn (Question $record): string => strip_tags($record->body))
             ->defaultSort('order')
             ->columns([
                 TextColumn::make('order')
@@ -121,13 +130,29 @@ class QuestionsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make(),
+                AttachAction::make()
+                    ->preloadRecordSelect()
+                    ->schema(fn (AttachAction $action): array => [
+                        $action->getRecordSelect()
+                            ->label('Question'),
+                        TextInput::make('points')
+                            ->numeric()
+                            ->required()
+                            ->default(1)
+                            ->minValue(1),
+                        TextInput::make('order')
+                            ->numeric()
+                            ->default(0),
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DetachAction::make(),
             ])
             ->toolbarActions([
-                DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DetachBulkAction::make(),
+                ]),
             ]);
     }
 }

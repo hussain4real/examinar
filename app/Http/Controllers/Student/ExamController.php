@@ -48,9 +48,7 @@ class ExamController extends Controller
         }
 
         $exam = $examSession->exam;
-        $questions = $exam->questions()
-            ->select(['id', 'exam_id', 'type', 'body', 'options', 'points', 'order'])
-            ->get();
+        $questions = $exam->questions()->get();
 
         if ($exam->shuffle_questions) {
             $questions = $questions->shuffle();
@@ -62,8 +60,8 @@ class ExamController extends Controller
             'type' => $q->type,
             'body' => $q->body,
             'options' => $q->options ? array_map(fn ($o) => is_array($o) ? $o['text'] : $o, $q->options) : null,
-            'points' => $q->points,
-            'order' => $q->order,
+            'points' => $q->pivot->points,
+            'order' => $q->pivot->order,
         ]);
 
         // Get existing answers for this attempt
@@ -192,7 +190,7 @@ class ExamController extends Controller
             $answer->update(['is_correct' => $isCorrect]);
 
             if ($isCorrect) {
-                $score += $question->points;
+                $score += $question->pivot->points;
             }
         }
 

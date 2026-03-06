@@ -14,10 +14,16 @@ beforeEach(function () {
     $this->exam = Exam::factory()->create(['created_by' => $this->admin->id]);
 
     $this->questions = Question::factory()->count(3)->sequence(
-        ['order' => 1, 'correct_answer' => 'Option A'],
-        ['order' => 2, 'correct_answer' => 'Option B'],
-        ['order' => 3, 'correct_answer' => 'Option A'],
-    )->create(['exam_id' => $this->exam->id]);
+        ['correct_answer' => 'Option A'],
+        ['correct_answer' => 'Option B'],
+        ['correct_answer' => 'Option A'],
+    )->create();
+
+    $this->exam->questions()->attach([
+        $this->questions[0]->id => ['points' => 1, 'order' => 1],
+        $this->questions[1]->id => ['points' => 1, 'order' => 2],
+        $this->questions[2]->id => ['points' => 1, 'order' => 3],
+    ]);
 });
 
 // --- Lobby ---

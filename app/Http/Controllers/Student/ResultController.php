@@ -16,10 +16,13 @@ class ResultController extends Controller
         abort_if($examAttempt->status === 'in_progress', 404);
 
         $examAttempt->load([
-            'session.exam:id,title,pass_score,duration_minutes',
-            'answers.question:id,type,body,options,correct_answer,points',
+            'session.exam.questions',
+            'answers.question:id,type,body,options,correct_answer',
             'antiCheatLogs',
         ]);
+
+        $exam = $examAttempt->session->exam;
+        $pivotPoints = $exam->questions->pluck('pivot.points', 'id');
 
         return Inertia::render('student/Results', [
             'attempt' => [
@@ -33,8 +36,8 @@ class ResultController extends Controller
                 'flag_count' => $examAttempt->flag_count,
             ],
             'exam' => [
-                'title' => $examAttempt->session->exam->title,
-                'pass_score' => $examAttempt->session->exam->pass_score,
+                'title' => $exam->title,
+                'pass_score' => $exam->pass_score,
             ],
             'antiCheatLogs' => $examAttempt->antiCheatLogs->map(fn ($log) => [
                 'event_type' => $log->event_type,
@@ -50,7 +53,7 @@ class ResultController extends Controller
                     'type' => $a->question->type,
                     'options' => $a->question->options ? array_map(fn ($o) => is_array($o) ? $o['text'] : $o, $a->question->options) : null,
                     'correct_answer' => $a->question->correct_answer,
-                    'points' => $a->question->points,
+                    'points' => $pivotPoints->get($a->question_id, 1),
                 ],
             ]),
         ]);

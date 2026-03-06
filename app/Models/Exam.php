@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exam extends Model
@@ -35,9 +36,12 @@ class Exam extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function questions(): HasMany
+    public function questions(): BelongsToMany
     {
-        return $this->hasMany(Question::class)->orderBy('order');
+        return $this->belongsToMany(Question::class)
+            ->withPivot(['points', 'order'])
+            ->withTimestamps()
+            ->orderByPivot('order');
     }
 
     public function sessions(): HasMany
@@ -47,6 +51,6 @@ class Exam extends Model
 
     public function getTotalPointsAttribute(): int
     {
-        return $this->questions()->sum('points');
+        return $this->questions()->sum('exam_question.points');
     }
 }
