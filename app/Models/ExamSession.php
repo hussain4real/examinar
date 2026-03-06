@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\ExamSessionEnded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,12 @@ class ExamSession extends Model
                 if ($session->status === 'completed' && ! $session->ended_at) {
                     $session->ended_at = now();
                 }
+            }
+        });
+
+        static::saved(function (ExamSession $session) {
+            if ($session->wasChanged('status') && $session->status === 'completed') {
+                ExamSessionEnded::dispatch($session);
             }
         });
     }

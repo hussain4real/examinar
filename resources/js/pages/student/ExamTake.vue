@@ -84,6 +84,11 @@ function goToQuestion(index: number): void {
     }
 }
 
+function getCsrfToken(): string {
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
 // Answer handling
 function selectAnswer(questionId: number, answer: string): void {
     answers.value[questionId] = answer;
@@ -95,7 +100,7 @@ function saveAnswer(questionId: number, selectedAnswer: string): void {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+            'X-XSRF-TOKEN': getCsrfToken(),
             Accept: 'application/json',
         },
         body: JSON.stringify({
@@ -141,7 +146,7 @@ function logAntiCheatEvent(eventType: string, details?: Record<string, unknown>)
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+            'X-XSRF-TOKEN': getCsrfToken(),
             Accept: 'application/json',
         },
         body: JSON.stringify({ event_type: eventType, details }),
