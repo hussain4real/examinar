@@ -82,9 +82,19 @@ Replace `YOUR_LAN_IP` with the server machine's LAN IP address (e.g., `192.168.1
 
 ### 5. Start the server
 
+**On Windows:**
+
+```bash
+composer run dev:win
+```
+
+**On macOS/Linux:**
+
 ```bash
 composer run dev
 ```
+
+> **Why two commands?** Laravel Pail (log viewer) requires the `pcntl` PHP extension, which is not available on Windows. The `dev:win` script skips Pail — everything else works the same.
 
 This starts all required services concurrently:
 - **Web server** — `http://localhost:8000`
@@ -156,7 +166,8 @@ This recreates all tables and re-seeds the default accounts and sample quiz.
 
 | Problem | Solution |
 |---------|----------|
-| Students can't access the site | Check Windows Firewall (see above). Verify the LAN IP with `ipconfig`. Ensure `composer run dev` is running. |
+| Students can't access the site | Check Windows Firewall (see above). Verify the LAN IP with `ipconfig`. Ensure the dev server is running. |
+| `pcntl` extension error on Windows | Use `composer run dev:win` instead of `composer run dev`. Pail is not supported on Windows. |
 | Real-time features not working (students don't appear in lobby) | Verify `VITE_REVERB_HOST` in `.env` matches the server's LAN IP. Rebuild with `npm run build`. Check that Reverb is running (look for "reverb" in the terminal output). |
 | "Unable to locate file in Vite manifest" error | Run `npm run build` to compile frontend assets. |
 | Database errors after update | Run `php artisan migrate` to apply new migrations. |
@@ -168,7 +179,8 @@ This recreates all tables and re-seeds the default accounts and sample quiz.
 | Command | Description |
 |---------|-------------|
 | `composer setup` | Full first-time setup (install deps, configure, migrate, build) |
-| `composer run dev` | Start all services for development/exam use |
+| `composer run dev` | Start all services (macOS/Linux) |
+| `composer run dev:win` | Start all services (Windows — skips Pail log viewer) |
 | `php artisan db:seed` | Seed demo accounts and sample quiz |
 | `php artisan migrate:fresh --seed` | Reset database and re-seed |
 | `php artisan serve --host=0.0.0.0` | Start web server bound to all network interfaces |
