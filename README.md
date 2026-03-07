@@ -82,19 +82,27 @@ Replace `YOUR_LAN_IP` with the server machine's LAN IP address (e.g., `192.168.1
 
 ### 5. Start the server
 
-**On Windows:**
+**On Windows with Laravel Herd:**
 
 ```bash
 composer run dev:win
 ```
+
+Herd already serves the site at `examinar.test`, so this starts only the background services (queue worker, Vite, and Reverb). Access the site at `https://examinar.test`.
+
+For **student LAN access**, open a separate PowerShell window **as Administrator** and run:
+
+```powershell
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+> Running as Administrator is required on Windows to bind to all network interfaces (`0.0.0.0`). Students then connect at `http://YOUR_LAN_IP:8000`.
 
 **On macOS/Linux:**
 
 ```bash
 composer run dev
 ```
-
-> **Why two commands?** Laravel Pail (log viewer) requires the `pcntl` PHP extension, which is not available on Windows. The `dev:win` script skips Pail — everything else works the same.
 
 This starts all required services concurrently:
 - **Web server** — `http://localhost:8000`
@@ -168,6 +176,7 @@ This recreates all tables and re-seeds the default accounts and sample quiz.
 |---------|----------|
 | Students can't access the site | Check Windows Firewall (see above). Verify the LAN IP with `ipconfig`. Ensure the dev server is running. |
 | `pcntl` extension error on Windows | Use `composer run dev:win` instead of `composer run dev`. Pail is not supported on Windows. |
+| `Failed to listen on 0.0.0.0:8000` on Windows | Run PowerShell **as Administrator** — binding to all interfaces requires elevated privileges. Or skip `artisan serve` and use Herd's `examinar.test` for local access. |
 | Real-time features not working (students don't appear in lobby) | Verify `VITE_REVERB_HOST` in `.env` matches the server's LAN IP. Rebuild with `npm run build`. Check that Reverb is running (look for "reverb" in the terminal output). |
 | "Unable to locate file in Vite manifest" error | Run `npm run build` to compile frontend assets. |
 | Database errors after update | Run `php artisan migrate` to apply new migrations. |
@@ -180,7 +189,7 @@ This recreates all tables and re-seeds the default accounts and sample quiz.
 |---------|-------------|
 | `composer setup` | Full first-time setup (install deps, configure, migrate, build) |
 | `composer run dev` | Start all services (macOS/Linux) |
-| `composer run dev:win` | Start all services (Windows — skips Pail log viewer) |
+| `composer run dev:win` | Start background services for Windows + Herd (queue, Vite, Reverb) |
 | `php artisan db:seed` | Seed demo accounts and sample quiz |
 | `php artisan migrate:fresh --seed` | Reset database and re-seed |
 | `php artisan serve --host=0.0.0.0` | Start web server bound to all network interfaces |
