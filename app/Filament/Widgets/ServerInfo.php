@@ -28,4 +28,15 @@ class ServerInfo extends Widget
     {
         return request()->getSchemeAndHttpHost();
     }
+
+    public function getStudentUrl(): string
+    {
+        $ip = $this->getLanIp();
+
+        if ($ip === 'Unable to detect') {
+            return $ip;
+        }
+
+        return "http://{$ip}:8000";
+    }
 }
