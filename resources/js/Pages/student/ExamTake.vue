@@ -7,6 +7,7 @@ import {
     ChevronRight,
     Clock,
     Flag,
+    OctagonX,
     Send,
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -52,6 +53,7 @@ const currentIndex = ref(0);
 const answers = ref<Record<number, string>>({ ...props.existingAnswers });
 const submitting = ref(false);
 const showConfirmSubmit = ref(false);
+const sessionEnded = ref(false);
 
 // Timer
 const timeRemaining = ref(0);
@@ -142,10 +144,12 @@ function submitExam(): void {
 }
 
 function autoSubmit(): void {
-    if (!submitting.value) {
-        submitting.value = true;
+    if (submitting.value) return;
+    submitting.value = true;
+    sessionEnded.value = true;
+    setTimeout(() => {
         router.post(`/student/exam/${props.examSession.id}/submit`);
-    }
+    }, 3000);
 }
 
 // Listen for session end
@@ -482,6 +486,67 @@ onBeforeUnmount(() => {
                 </div>
             </div>
         </div>
+
+        <!-- Session Ended Overlay -->
+        <Teleport to="body">
+            <Transition
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+            >
+                <div
+                    v-if="sessionEnded"
+                    class="fixed inset-0 z-[110] flex items-center justify-center bg-black/60"
+                >
+                    <div
+                        class="mx-4 w-full max-w-sm rounded-xl bg-background p-6 text-center shadow-lg"
+                    >
+                        <div
+                            class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-destructive/10"
+                        >
+                            <OctagonX
+                                class="size-7 text-destructive"
+                            />
+                        </div>
+                        <h2 class="text-lg font-semibold">
+                            Exam Session Ended
+                        </h2>
+                        <p
+                            class="mt-2 text-sm text-muted-foreground"
+                        >
+                            The examiner has ended this session. Your
+                            answers have been saved and are being
+                            submitted automatically.
+                        </p>
+                        <div
+                            class="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                        >
+                            <svg
+                                class="size-4 animate-spin"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                />
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                            </svg>
+                            Redirecting to results…
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
 
         <!-- Confirm Submit Modal -->
         <Teleport to="body">
