@@ -39,11 +39,11 @@ class ResultController extends Controller
                 'title' => $exam->title,
                 'pass_score' => $exam->pass_score,
             ],
-            'antiCheatLogs' => $examAttempt->antiCheatLogs->map(fn ($log) => [
+            'antiCheatLogs' => Inertia::defer(fn () => $examAttempt->antiCheatLogs->map(fn ($log) => [
                 'event_type' => $log->event_type,
                 'details' => $log->details,
                 'created_at' => $log->created_at->toISOString(),
-            ]),
+            ])),
             'answers' => $examAttempt->answers->map(fn ($a) => [
                 'question_id' => $a->question_id,
                 'selected_answer' => $a->selected_answer,

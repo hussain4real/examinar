@@ -28,6 +28,7 @@ Route::middleware(['auth', StudentOnly::class])->prefix('student')->group(functi
     Route::get('lobby', LobbyController::class)->name('student.lobby');
 
     Route::get('exam/{examSession}', [ExamController::class, 'show'])->name('student.exam');
+    Route::get('exam/{examSession}/status', [ExamController::class, 'status'])->name('student.exam.status');
     Route::post('exam/{examSession}/answer', [ExamController::class, 'answer'])->name('student.exam.answer');
     Route::post('exam/{examSession}/submit', [ExamController::class, 'submit'])->name('student.exam.submit');
     Route::post('exam/{examSession}/anti-cheat', [ExamController::class, 'logAntiCheat'])->name('student.exam.anti-cheat');

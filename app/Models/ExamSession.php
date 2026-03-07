@@ -35,6 +35,7 @@ class ExamSession extends Model
 
         static::saved(function (ExamSession $session) {
             if ($session->wasChanged('status') && $session->status === 'completed') {
+                $session->gradeInProgressAttempts();
                 ExamSessionEnded::dispatch($session);
             }
         });
@@ -71,5 +72,44 @@ class ExamSession extends Model
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
+    }
+
+    /**
+     * Grade all in-progress attempts when the session ends.
+     */
+    public function gradeInProgressAttempts(): void
+    {
+        $this->loadMissing('exam.questions');
+        $questions = $this->exam->questions->keyBy('id');
+
+        $attempts = $this->attempts()
+            ->where('status', 'in_progress')
+            ->with('answers')
+            ->get();
+
+        foreach ($attempts as $attempt) {
+            $score = 0;
+
+            foreach ($attempt->answers as $answer) {
+                $question = $questions->get($answer->question_id);
+
+                if (! $question) {
+                    continue;
+                }
+
+                $isCorrect = strtolower(trim($answer->selected_answer)) === strtolower(trim($question->correct_answer));
+                $answer->update(['is_correct' => $isCorrect]);
+
+                if ($isCorrect) {
+                    $score += $question->pivot->points;
+                }
+            }
+
+            $attempt->update([
+                'score' => $score,
+                'submitted_at' => now(),
+                'status' => 'submitted',
+            ]);
+        }
     }
 }

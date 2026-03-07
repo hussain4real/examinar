@@ -24,6 +24,9 @@ test('authenticated student can visit the dashboard', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('Dashboard')
         ->has('stats')
-        ->has('recentAttempts')
+        ->missing('recentAttempts')
+        ->loadDeferredProps(fn ($reload) => $reload
+            ->has('recentAttempts')
+        )
     );
 });

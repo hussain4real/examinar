@@ -17,6 +17,15 @@ class HandleInertiaRequests extends Middleware
     protected $rootView = 'app';
 
     /**
+     * Routes that should not use server-side rendering.
+     *
+     * @var array<int, string>
+     */
+    protected $withoutSsr = [
+        'student/exam/*',
+    ];
+
+    /**
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning

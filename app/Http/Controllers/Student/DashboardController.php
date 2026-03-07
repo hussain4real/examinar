@@ -39,7 +39,7 @@ class DashboardController extends Controller
                 'passed_count' => $passedCount,
                 'active_sessions' => $activeSessions,
             ],
-            'recentAttempts' => $attempts->take(5)->map(fn (ExamAttempt $a) => [
+            'recentAttempts' => Inertia::defer(fn () => $attempts->take(5)->map(fn (ExamAttempt $a) => [
                 'id' => $a->id,
                 'exam_title' => $a->session->exam->title,
                 'score' => $a->score,
@@ -48,7 +48,7 @@ class DashboardController extends Controller
                 'passed' => $a->passed,
                 'flag_count' => $a->flag_count,
                 'submitted_at' => $a->submitted_at?->diffForHumans(),
-            ]),
+            ])),
         ]);
     }
 }

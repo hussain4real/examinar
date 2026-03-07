@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Deferred, Head, Link } from '@inertiajs/vue3';
 import {
     AlertTriangle,
     ArrowLeft,
@@ -309,7 +309,28 @@ function formatDuration(start: string, end: string): string {
             </div>
 
             <!-- Anti-Cheat Activity -->
-            <section v-if="antiCheatLogs.length > 0" class="mt-8">
+            <Deferred data="antiCheatLogs">
+                <template #fallback>
+                    <section class="mt-8">
+                        <div class="mb-4 flex items-center gap-2">
+                            <AlertTriangle class="size-5 text-muted-foreground animate-pulse" />
+                            <div class="h-5 w-48 animate-pulse rounded bg-muted" />
+                        </div>
+                        <Card>
+                            <CardContent class="space-y-3 p-4">
+                                <div v-for="n in 3" :key="n" class="flex items-center gap-3">
+                                    <div class="size-8 animate-pulse rounded-full bg-muted" />
+                                    <div class="flex-1 space-y-1">
+                                        <div class="h-4 w-24 animate-pulse rounded bg-muted" />
+                                        <div class="h-3 w-40 animate-pulse rounded bg-muted" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                </template>
+
+                <section v-if="antiCheatLogs.length > 0" class="mt-8">
                 <div class="mb-4 flex items-center gap-2">
                     <AlertTriangle class="size-5 text-amber-500" />
                     <h2 class="text-lg font-semibold">
@@ -382,6 +403,7 @@ function formatDuration(start: string, end: string): string {
                     </CardContent>
                 </Card>
             </section>
+            </Deferred>
 
             <!-- Back to lobby -->
             <div class="mt-8 text-center">

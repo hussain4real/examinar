@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Deferred, Head, Link } from '@inertiajs/vue3';
 import {
     ArrowRight,
     Award,
@@ -147,6 +147,27 @@ defineProps<{
             </div>
 
             <!-- Recent Results -->
+            <Deferred data="recentAttempts">
+                <template #fallback>
+                    <section>
+                        <div class="mb-4">
+                            <h2 class="text-lg font-semibold">Recent Results</h2>
+                        </div>
+                        <div class="space-y-3">
+                            <Card v-for="n in 3" :key="n">
+                                <CardContent class="flex items-center gap-4 py-4">
+                                    <div class="size-10 animate-pulse rounded-full bg-muted" />
+                                    <div class="flex-1 space-y-2">
+                                        <div class="h-4 w-32 animate-pulse rounded bg-muted" />
+                                        <div class="h-3 w-20 animate-pulse rounded bg-muted" />
+                                    </div>
+                                    <div class="h-5 w-16 animate-pulse rounded bg-muted" />
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </section>
+                </template>
+
             <section>
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-lg font-semibold">Recent Results</h2>
@@ -240,6 +261,7 @@ defineProps<{
                     </CardContent>
                 </Card>
             </section>
+            </Deferred>
         </div>
     </StudentLayout>
 </template>

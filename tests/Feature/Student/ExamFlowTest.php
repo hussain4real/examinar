@@ -259,3 +259,88 @@ it('increments flag count on anti-cheat event', function () {
 
     expect($attempt->fresh()->flag_count)->toBe(1);
 });
+
+// --- Session End Enforcement ---
+
+it('rejects answers when session is completed', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    ExamAttempt::factory()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+    ]);
+
+    // End the session
+    $session->update(['status' => 'completed']);
+
+    $this->actingAs($this->student)
+        ->postJson("/student/exam/{$session->id}/answer", [
+            'question_id' => $this->questions[0]->id,
+            'selected_answer' => 'Option A',
+        ])
+        ->assertSuccessful()
+        ->assertJson(['saved' => false, 'session_ended' => true]);
+});
+
+it('redirects to results when submitting an already-graded attempt', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    $attempt = ExamAttempt::factory()->submitted()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+    ]);
+
+    $this->actingAs($this->student)
+        ->post("/student/exam/{$session->id}/submit")
+        ->assertRedirect(route('student.results', $attempt));
+});
+
+it('redirects to lobby when submitting with no attempt', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+
+    $this->actingAs($this->student)
+        ->post("/student/exam/{$session->id}/submit")
+        ->assertRedirect(route('student.lobby'));
+});
+
+it('auto-grades in-progress attempts when session ends', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    $attempt = ExamAttempt::factory()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+        'total_points' => 3,
+    ]);
+
+    Answer::factory()->create([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $this->questions[0]->id,
+        'selected_answer' => 'Option A', // correct
+    ]);
+    Answer::factory()->create([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $this->questions[1]->id,
+        'selected_answer' => 'Option C', // wrong
+    ]);
+
+    // Ending the session should auto-grade
+    $session->update(['status' => 'completed']);
+
+    $attempt->refresh();
+    expect($attempt->status)->toBe('submitted')
+        ->and($attempt->score)->toBe(1)
+        ->and($attempt->submitted_at)->not->toBeNull();
+});
+
+it('returns session status from status endpoint', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+
+    $this->actingAs($this->student)
+        ->getJson("/student/exam/{$session->id}/status")
+        ->assertSuccessful()
+        ->assertJson(['status' => 'active']);
+
+    $session->update(['status' => 'completed']);
+
+    $this->actingAs($this->student)
+        ->getJson("/student/exam/{$session->id}/status")
+        ->assertSuccessful()
+        ->assertJson(['status' => 'completed']);
+});

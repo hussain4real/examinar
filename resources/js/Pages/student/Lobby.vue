@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePoll } from '@inertiajs/vue3';
 import { useEchoPublic } from '@laravel/echo-vue';
 import { Clock, Play, Trophy, Users } from 'lucide-vue-next';
 import HelpBanner from '@/components/HelpBanner.vue';
@@ -58,6 +58,9 @@ useEchoPublic('lobby', '.ExamSessionStarted', () => {
 useEchoPublic('lobby', '.ExamSessionEnded', () => {
     router.reload({ only: ['sessions', 'pastAttempts'] });
 });
+
+// Fallback polling in case websocket connection drops
+usePoll(15000, { only: ['sessions', 'pastAttempts'] });
 </script>
 
 <template>

@@ -92,10 +92,22 @@ class ExamController extends Controller
     }
 
     /**
+     * Check session status (polling fallback for websocket).
+     */
+    public function status(ExamSession $examSession): array
+    {
+        return ['status' => $examSession->status];
+    }
+
+    /**
      * Save a single answer.
      */
     public function answer(Request $request, ExamSession $examSession): array
     {
+        if (! $examSession->isActive()) {
+            return ['saved' => false, 'session_ended' => true];
+        }
+
         $request->validate([
             'question_id' => ['required', 'integer', 'exists:questions,id'],
             'selected_answer' => ['required', 'string'],
@@ -129,7 +141,21 @@ class ExamController extends Controller
             ->where('exam_session_id', $examSession->id)
             ->where('user_id', $request->user()->id)
             ->where('status', 'in_progress')
-            ->firstOrFail();
+            ->first();
+
+        if (! $attempt) {
+            $submitted = ExamAttempt::query()
+                ->where('exam_session_id', $examSession->id)
+                ->where('user_id', $request->user()->id)
+                ->where('status', 'submitted')
+                ->first();
+
+            if ($submitted) {
+                return redirect()->route('student.results', $submitted);
+            }
+
+            return redirect()->route('student.lobby');
+        }
 
         $this->gradeAttempt($attempt);
 

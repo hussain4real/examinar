@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, useHttp } from '@inertiajs/vue3';
 import { useEchoPublic } from '@laravel/echo-vue';
 import {
     AlertTriangle,
@@ -92,10 +92,16 @@ function goToQuestion(index: number): void {
     }
 }
 
-function getCsrfToken(): string {
-    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : '';
-}
+// HTTP helpers for non-navigation requests
+const answerHttp = useHttp({
+    question_id: 0,
+    selected_answer: '',
+});
+
+const antiCheatHttp = useHttp({
+    event_type: '',
+    details: {} as Record<string, unknown> | undefined,
+});
 
 // Answer handling
 function selectAnswer(questionId: number, answer: string): void {
@@ -104,17 +110,14 @@ function selectAnswer(questionId: number, answer: string): void {
 }
 
 function saveAnswer(questionId: number, selectedAnswer: string): void {
-    fetch(`/student/exam/${props.examSession.id}/answer`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': getCsrfToken(),
-            Accept: 'application/json',
+    answerHttp.question_id = questionId;
+    answerHttp.selected_answer = selectedAnswer;
+    answerHttp.post(`/student/exam/${props.examSession.id}/answer`, {
+        onSuccess: (response: any) => {
+            if (response?.session_ended) {
+                autoSubmit();
+            }
         },
-        body: JSON.stringify({
-            question_id: questionId,
-            selected_answer: selectedAnswer,
-        }),
     });
 }
 
@@ -154,6 +157,22 @@ useEchoPublic(
     },
 );
 
+// Poll session status as fallback for websocket failures
+const statusPollInterval = setInterval(async () => {
+    try {
+        const res = await fetch(`/student/exam/${props.examSession.id}/status`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'completed') {
+                clearInterval(statusPollInterval);
+                autoSubmit();
+            }
+        }
+    } catch {
+        // Network error — next poll will retry
+    }
+}, 10000);
+
 // Anti-cheat
 const flagCount = ref(0);
 
@@ -161,21 +180,15 @@ function logAntiCheatEvent(
     eventType: string,
     details?: Record<string, unknown>,
 ): void {
-    fetch(`/student/exam/${props.examSession.id}/anti-cheat`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': getCsrfToken(),
-            Accept: 'application/json',
-        },
-        body: JSON.stringify({ event_type: eventType, details }),
-    })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.flag_count !== undefined) {
-                flagCount.value = data.flag_count;
+    antiCheatHttp.event_type = eventType;
+    antiCheatHttp.details = details;
+    antiCheatHttp.post(`/student/exam/${props.examSession.id}/anti-cheat`, {
+        onSuccess: (response: any) => {
+            if (response?.flag_count !== undefined) {
+                flagCount.value = response.flag_count;
             }
-        });
+        },
+    });
 }
 
 function getEventContext(): Record<string, unknown> {
@@ -223,6 +236,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     clearInterval(timerInterval);
+    clearInterval(statusPollInterval);
     document.removeEventListener('visibilitychange', handleVisibilityChange);
     document.removeEventListener('contextmenu', handleContextMenu);
     document.removeEventListener('copy', handleCopy);

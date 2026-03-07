@@ -11,7 +11,7 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^5.0",
-        "inertiajs/inertia-laravel": "^2.0",
+        "inertiajs/inertia-laravel": "^3.0.0-beta",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/reverb": "^1.0",
@@ -55,7 +55,7 @@
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#34d399\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" \"php artisan reverb:start --debug\" --names=server,queue,logs,vite,reverb --kill-others"
         ],
         "dev:ssr": [
-            "npm run build:ssr",
+            "npm run build",
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"php artisan inertia:start-ssr\" --names=server,queue,logs,ssr --kill-others"
         ],
@@ -111,6 +111,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }
