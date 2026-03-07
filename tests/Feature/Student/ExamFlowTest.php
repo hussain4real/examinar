@@ -344,3 +344,80 @@ it('returns session status from status endpoint', function () {
         ->assertSuccessful()
         ->assertJson(['status' => 'completed']);
 });
+
+// --- Student Kick ---
+
+it('kicks a student by grading and ending their attempt', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    $attempt = ExamAttempt::factory()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+        'total_points' => 3,
+    ]);
+
+    Answer::factory()->create([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $this->questions[0]->id,
+        'selected_answer' => 'Option A', // correct
+    ]);
+    Answer::factory()->create([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $this->questions[1]->id,
+        'selected_answer' => 'Option C', // wrong
+    ]);
+
+    $session->kickStudent($attempt);
+
+    $attempt->refresh();
+    expect($attempt->status)->toBe('kicked')
+        ->and($attempt->score)->toBe(1)
+        ->and($attempt->submitted_at)->not->toBeNull();
+});
+
+it('does not kick an already submitted student', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    $attempt = ExamAttempt::factory()->submitted()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+    ]);
+
+    $session->kickStudent($attempt);
+
+    $attempt->refresh();
+    expect($attempt->status)->toBe('submitted');
+});
+
+it('redirects kicked student to results on submit', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    $attempt = ExamAttempt::factory()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+        'total_points' => 3,
+    ]);
+
+    $session->kickStudent($attempt);
+
+    $this->actingAs($this->student)
+        ->post("/student/exam/{$session->id}/submit")
+        ->assertRedirect(route('student.results', $attempt));
+});
+
+it('returns kicked attempt status from status endpoint', function () {
+    $session = ExamSession::factory()->active()->create(['exam_id' => $this->exam->id]);
+    $attempt = ExamAttempt::factory()->create([
+        'exam_session_id' => $session->id,
+        'user_id' => $this->student->id,
+    ]);
+
+    $this->actingAs($this->student)
+        ->getJson("/student/exam/{$session->id}/status")
+        ->assertSuccessful()
+        ->assertJson(['status' => 'active', 'attempt_status' => 'in_progress']);
+
+    $session->kickStudent($attempt);
+
+    $this->actingAs($this->student)
+        ->getJson("/student/exam/{$session->id}/status")
+        ->assertSuccessful()
+        ->assertJson(['status' => 'active', 'attempt_status' => 'kicked']);
+});

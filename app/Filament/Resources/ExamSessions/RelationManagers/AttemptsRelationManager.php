@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ExamSessions\RelationManagers;
 
+use App\Models\ExamAttempt;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\RepeatableEntry\TableColumn;
@@ -31,6 +33,7 @@ class AttemptsRelationManager extends RelationManager
                     ->color(fn (string $state): string => match ($state) {
                         'in_progress' => 'warning',
                         'submitted', 'graded' => 'success',
+                        'kicked' => 'danger',
                         default => 'gray',
                     }),
                 TextColumn::make('score')
@@ -56,6 +59,19 @@ class AttemptsRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('kick')
+                    ->label('Kick')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Kick Student')
+                    ->modalDescription('This will end the student\'s exam, grade their current answers, and remove them from the session. This cannot be undone.')
+                    ->modalSubmitActionLabel('Kick Student')
+                    ->visible(fn (ExamAttempt $record): bool => $record->status === 'in_progress')
+                    ->action(function (ExamAttempt $record): void {
+                        $record->session->kickStudent($record);
+                    })
+                    ->successNotificationTitle('Student has been kicked from the exam.'),
             ]);
     }
 

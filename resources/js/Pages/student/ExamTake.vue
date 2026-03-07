@@ -39,6 +39,7 @@ type Props = {
     };
     attempt: {
         id: number;
+        user_id: number;
         started_at: string;
         status: string;
     };
@@ -54,6 +55,7 @@ const answers = ref<Record<number, string>>({ ...props.existingAnswers });
 const submitting = ref(false);
 const showConfirmSubmit = ref(false);
 const sessionEnded = ref(false);
+const studentKicked = ref(false);
 
 // Timer
 const timeRemaining = ref(0);
@@ -152,6 +154,15 @@ function autoSubmit(): void {
     }, 3000);
 }
 
+function handleKicked(): void {
+    if (submitting.value) return;
+    submitting.value = true;
+    studentKicked.value = true;
+    setTimeout(() => {
+        router.post(`/student/exam/${props.examSession.id}/submit`);
+    }, 4000);
+}
+
 // Listen for session end
 useEchoPublic(
     `exam-session.${props.examSession.id}`,
@@ -161,13 +172,27 @@ useEchoPublic(
     },
 );
 
+// Listen for individual kick
+useEchoPublic(
+    `exam-session.${props.examSession.id}`,
+    '.StudentKicked',
+    (event: { user_id: number }) => {
+        if (event.user_id === props.attempt.user_id) {
+            handleKicked();
+        }
+    },
+);
+
 // Poll session status as fallback for websocket failures
 const statusPollInterval = setInterval(async () => {
     try {
         const res = await fetch(`/student/exam/${props.examSession.id}/status`);
         if (res.ok) {
             const data = await res.json();
-            if (data.status === 'completed') {
+            if (data.attempt_status === 'kicked') {
+                clearInterval(statusPollInterval);
+                handleKicked();
+            } else if (data.status === 'completed') {
                 clearInterval(statusPollInterval);
                 autoSubmit();
             }
@@ -495,7 +520,7 @@ onBeforeUnmount(() => {
                 enter-to-class="opacity-100"
             >
                 <div
-                    v-if="sessionEnded"
+                    v-if="sessionEnded && !studentKicked"
                     class="fixed inset-0 z-[110] flex items-center justify-center bg-black/60"
                 >
                     <div
@@ -541,7 +566,68 @@ onBeforeUnmount(() => {
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                                 />
                             </svg>
-                            Redirecting to results…
+                            Redirecting to results&hellip;
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
+
+        <!-- Student Kicked Overlay -->
+        <Teleport to="body">
+            <Transition
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+            >
+                <div
+                    v-if="studentKicked"
+                    class="fixed inset-0 z-[120] flex items-center justify-center bg-black/60"
+                >
+                    <div
+                        class="mx-4 w-full max-w-sm rounded-xl bg-background p-6 text-center shadow-lg"
+                    >
+                        <div
+                            class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-destructive/10"
+                        >
+                            <AlertTriangle
+                                class="size-7 text-destructive"
+                            />
+                        </div>
+                        <h2 class="text-lg font-semibold">
+                            You Have Been Removed
+                        </h2>
+                        <p
+                            class="mt-2 text-sm text-muted-foreground"
+                        >
+                            The examiner has removed you from this exam
+                            session. Your answers have been saved and
+                            graded.
+                        </p>
+                        <div
+                            class="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                        >
+                            <svg
+                                class="size-4 animate-spin"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                />
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                            </svg>
+                            Redirecting to results&hellip;
                         </div>
                     </div>
                 </div>

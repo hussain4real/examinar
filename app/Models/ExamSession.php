@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\ExamSessionEnded;
+use App\Events\StudentKicked;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -111,5 +112,44 @@ class ExamSession extends Model
                 'status' => 'submitted',
             ]);
         }
+    }
+
+    /**
+     * Kick a specific student from this session by grading and ending their attempt.
+     */
+    public function kickStudent(ExamAttempt $attempt): void
+    {
+        if ($attempt->status !== 'in_progress') {
+            return;
+        }
+
+        $this->loadMissing('exam.questions');
+        $questions = $this->exam->questions->keyBy('id');
+        $attempt->loadMissing('answers');
+
+        $score = 0;
+
+        foreach ($attempt->answers as $answer) {
+            $question = $questions->get($answer->question_id);
+
+            if (! $question) {
+                continue;
+            }
+
+            $isCorrect = strtolower(trim($answer->selected_answer)) === strtolower(trim($question->correct_answer));
+            $answer->update(['is_correct' => $isCorrect]);
+
+            if ($isCorrect) {
+                $score += $question->pivot->points;
+            }
+        }
+
+        $attempt->update([
+            'score' => $score,
+            'submitted_at' => now(),
+            'status' => 'kicked',
+        ]);
+
+        StudentKicked::dispatch($attempt);
     }
 }

@@ -83,6 +83,7 @@ class ExamController extends Controller
             ],
             'attempt' => [
                 'id' => $attempt->id,
+                'user_id' => $attempt->user_id,
                 'started_at' => $attempt->started_at->toISOString(),
                 'status' => $attempt->status,
             ],
@@ -94,9 +95,17 @@ class ExamController extends Controller
     /**
      * Check session status (polling fallback for websocket).
      */
-    public function status(ExamSession $examSession): array
+    public function status(Request $request, ExamSession $examSession): array
     {
-        return ['status' => $examSession->status];
+        $attempt = ExamAttempt::query()
+            ->where('exam_session_id', $examSession->id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        return [
+            'status' => $examSession->status,
+            'attempt_status' => $attempt?->status,
+        ];
     }
 
     /**
@@ -147,7 +156,7 @@ class ExamController extends Controller
             $submitted = ExamAttempt::query()
                 ->where('exam_session_id', $examSession->id)
                 ->where('user_id', $request->user()->id)
-                ->where('status', 'submitted')
+                ->whereIn('status', ['submitted', 'kicked'])
                 ->first();
 
             if ($submitted) {
